@@ -7,10 +7,10 @@
 //   assets/images/<id>_head.png, <id>_torso.png y <id>_legs.png
 // Para cambiar personajes, cambia esta lista (y los nombres de las imágenes).
 const personajes = [
-  { id: 'arquera',     nombre: 'La Arquera' },
-  { id: 'ballestero',  nombre: 'El Ballestero' },
-  { id: 'espadachina', nombre: 'La Espadachina' },
-  { id: 'pistolero',   nombre: 'El Pistolero' }
+  { id: 'arquera',     nombre: 'Carol' },
+  { id: 'ballestero',  nombre: 'Daryld Dixon' },
+  { id: 'espadachina', nombre: 'Michonne' },
+  { id: 'pistolero',   nombre: 'Rick Grimes' }
 ];
 
 const partes = ['head', 'torso', 'legs'];
@@ -26,13 +26,13 @@ partes.forEach(function (parte) {
 });
 
 // ---------- 2. Sonidos ----------
-// Pon tus archivos en assets/sounds/ con estos nombres.
-// Si no existen, suena un pitido sencillo en su lugar.
+// La carpeta sounds está al lado de index.html (no dentro de assets).
+// Si un archivo no existe, suena un pitido sencillo en su lugar.
 const sonidos = {
-  girar:  'assets/sounds/spin.mp3',
-  parar:  'assets/sounds/stop.mp3',
-  zombie: 'assets/sounds/zombie.mp3',
-  ganar:  'assets/sounds/win.mp3'
+  girar:  'sounds/spin.mp3',
+  parar:  'sounds/stop.mp3',
+  zombie: 'sounds/zombie.mp3',
+  ganar:  'sounds/win.mp3'
 };
 
 // Se crean todos los audios al empezar, así ya están cargados cuando hacen falta
