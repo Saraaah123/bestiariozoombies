@@ -1,11 +1,3 @@
-// ===================================================
-// THE WALKING SPINNER
-// ===================================================
-
-// ---------- 1. Personajes ----------
-// Cada personaje tiene un id. Las imágenes se llaman:
-//   assets/images/<id>_head.png, <id>_torso.png y <id>_legs.png
-// Para cambiar personajes, cambia esta lista (y los nombres de las imágenes).
 const personajes = [
   { id: 'arquera',     nombre: 'Carol' },
   { id: 'ballestero',  nombre: 'Daryld Dixon' },
@@ -15,19 +7,15 @@ const personajes = [
 
 const partes = ['head', 'torso', 'legs'];
 
-// Lista de imágenes de cada parte. Cada una guarda el id de su personaje.
 const imagenes = { head: [], torso: [], legs: [] };
 partes.forEach(function (parte) {
   personajes.forEach(function (p) {
     const ruta = 'assets/images/' + p.id + '_' + parte + '.png';
     imagenes[parte].push({ id: p.id, nombre: p.nombre, src: ruta });
-    new Image().src = ruta;   // las carga antes para que no parpadeen
+    new Image().src = ruta;
   });
 });
 
-// ---------- 2. Sonidos ----------
-// La carpeta sounds está al lado de index.html (no dentro de assets).
-// Si un archivo no existe, suena un pitido sencillo en su lugar.
 const sonidos = {
   girar:  'sounds/spin.mp3',
   parar:  'sounds/stop.mp3',
@@ -35,7 +23,6 @@ const sonidos = {
   ganar:  'sounds/win.mp3'
 };
 
-// Se crean todos los audios al empezar, así ya están cargados cuando hacen falta
 const audios = {};
 Object.keys(sonidos).forEach(function (nombre) {
   audios[nombre] = new Audio(sonidos[nombre]);
@@ -43,12 +30,10 @@ Object.keys(sonidos).forEach(function (nombre) {
 });
 audios.girar.loop = true;
 
-let audioActual = null;   // sonido largo que está sonando
-let timerGiro = null;     // para el pitido repetido del giro
-let ctx = null;           // audio sintetizado (solo si falta un archivo)
+let audioActual = null;
+let timerGiro = null;
+let ctx = null;
 
-// Los navegadores solo dejan sonar un audio si antes el usuario hizo clic.
-// Con este truco, al hacer clic en GIRAR se "activan" los audios de resultado.
 function activarAudios() {
   ['parar', 'zombie', 'ganar'].forEach(function (nombre) {
     const audio = audios[nombre];
@@ -79,7 +64,6 @@ function tono(frecuencia, duracion, tipo, volumen, espera) {
   osc.stop(inicio + duracion);
 }
 
-// Pitidos de respaldo cuando no hay archivo de sonido
 function pitido(nombre) {
   if (nombre === 'girar') {
     timerGiro = setInterval(function () {
@@ -102,22 +86,12 @@ function pararSonidos() {
   clearInterval(timerGiro);
 }
 
-// DIAGNÓSTICO TEMPORAL: muestra en pantalla qué pasa con los audios
-const diagnostico = document.createElement('p');
-diagnostico.style.cssText = 'color:#ccc;font-size:13px;margin:8px auto;max-width:480px;';
-document.body.appendChild(diagnostico);
-
 function sonar(nombre) {
-  if (nombre !== 'parar') pararSonidos();   // así no se mezclan los sonidos
+  if (nombre !== 'parar') pararSonidos();
 
   const audio = audios[nombre];
-  const archivo = sonidos[nombre];
 
-  // si el archivo no existe o no se pudo cargar, usa el pitido
   if (audio.error) {
-    if (nombre === 'zombie' || nombre === 'ganar') {
-      diagnostico.textContent = 'AUDIO ' + archivo + ' -> NO SE PUDO CARGAR (codigo de error ' + audio.error.code + ')';
-    }
     pitido(nombre);
     return;
   }
@@ -125,22 +99,14 @@ function sonar(nombre) {
   audio.currentTime = 0;
   if (nombre !== 'parar') audioActual = audio;
 
-  audio.play().then(function () {
-    if (nombre === 'zombie' || nombre === 'ganar') {
-      diagnostico.textContent = 'AUDIO ' + archivo + ' -> reproduciendo (duracion ' + Math.round(audio.duration) + 's)';
-    }
-  }).catch(function (error) {
-    if (nombre === 'zombie' || nombre === 'ganar') {
-      diagnostico.textContent = 'AUDIO ' + archivo + ' -> FALLO: ' + error.name + ' | ' + error.message;
-    }
-    if (error.name === 'NotSupportedError') {   // el archivo no existe
+  audio.play().catch(function (error) {
+    if (error.name === 'NotSupportedError') {
       if (audioActual === audio) audioActual = null;
       pitido(nombre);
     }
   });
 }
 
-// ---------- 3. Elementos de la página ----------
 const botonGirar = document.getElementById('girar');
 const mensaje = document.getElementById('mensaje');
 const nombreGanador = document.getElementById('nombre');
@@ -161,14 +127,12 @@ function mostrar(parte, imagen) {
   document.getElementById('img-' + parte).src = imagen.src;
 }
 
-// Al empezar, cada parte muestra una imagen cualquiera
 partes.forEach(function (parte) {
   mostrar(parte, azar(imagenes[parte]));
 });
 
-// ---------- 4. Girar la ruleta ----------
 botonGirar.addEventListener('click', function () {
-  if (girando) return;            // no se puede girar dos veces a la vez
+  if (girando) return;
   girando = true;
   botonGirar.disabled = true;
   document.body.className = '';
@@ -185,14 +149,10 @@ botonGirar.addEventListener('click', function () {
     const caja = document.getElementById('caja-' + parte);
     caja.classList.add('girando');
 
-    // cambia de imagen rápido mientras gira
     const cambio = setInterval(function () {
       mostrar(parte, azar(imagenes[parte]));
     }, 60);
 
-    // cada parte se detiene en un momento distinto (0.3s, 0.55s y 0.8s)
-    // Para cambiar la velocidad: el primer número es cuándo se detiene la
-    // primera parte y el segundo cuánto después se detiene cada una (en milisegundos)
     setTimeout(function () {
       clearInterval(cambio);
       const final = azar(imagenes[parte]);
@@ -201,7 +161,7 @@ botonGirar.addEventListener('click', function () {
       caja.classList.remove('girando');
 
       detenidas++;
-      if (detenidas === 3) pararSonidos();   // se apaga el sonido del giro
+      if (detenidas === 3) pararSonidos();
       sonar('parar');
 
       if (detenidas === 3) {
@@ -211,8 +171,6 @@ botonGirar.addEventListener('click', function () {
   });
 });
 
-// ---------- 5. Revisar si ganó ----------
-// Se comparan los ids de las tres partes, no cómo se ven.
 function revisar(r) {
   const gano = r.head.id === r.torso.id && r.torso.id === r.legs.id;
 
