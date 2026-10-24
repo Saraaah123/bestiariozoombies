@@ -102,13 +102,22 @@ function pararSonidos() {
   clearInterval(timerGiro);
 }
 
+// DIAGNÓSTICO TEMPORAL: muestra en pantalla qué pasa con los audios
+const diagnostico = document.createElement('p');
+diagnostico.style.cssText = 'color:#ccc;font-size:13px;margin:8px auto;max-width:480px;';
+document.body.appendChild(diagnostico);
+
 function sonar(nombre) {
   if (nombre !== 'parar') pararSonidos();   // así no se mezclan los sonidos
 
   const audio = audios[nombre];
+  const archivo = sonidos[nombre];
 
   // si el archivo no existe o no se pudo cargar, usa el pitido
   if (audio.error) {
+    if (nombre === 'zombie' || nombre === 'ganar') {
+      diagnostico.textContent = 'AUDIO ' + archivo + ' -> NO SE PUDO CARGAR (codigo de error ' + audio.error.code + ')';
+    }
     pitido(nombre);
     return;
   }
@@ -116,7 +125,14 @@ function sonar(nombre) {
   audio.currentTime = 0;
   if (nombre !== 'parar') audioActual = audio;
 
-  audio.play().catch(function (error) {
+  audio.play().then(function () {
+    if (nombre === 'zombie' || nombre === 'ganar') {
+      diagnostico.textContent = 'AUDIO ' + archivo + ' -> reproduciendo (duracion ' + Math.round(audio.duration) + 's)';
+    }
+  }).catch(function (error) {
+    if (nombre === 'zombie' || nombre === 'ganar') {
+      diagnostico.textContent = 'AUDIO ' + archivo + ' -> FALLO: ' + error.name + ' | ' + error.message;
+    }
     if (error.name === 'NotSupportedError') {   // el archivo no existe
       if (audioActual === audio) audioActual = null;
       pitido(nombre);
